@@ -11,7 +11,6 @@ void main() {
   runApp(const MyAppWrapper());
 }
 
-/// Wrapper para carregar preferência antes de construir o app.
 class MyAppWrapper extends StatefulWidget {
   const MyAppWrapper({super.key});
   @override
@@ -53,7 +52,6 @@ class _MyAppWrapperState extends State<MyAppWrapper> {
   @override
   Widget build(BuildContext context) {
     if (!_loaded) {
-      // Splash simples enquanto carrega preferências
       return const MaterialApp(
         home: Scaffold(body: Center(child: CircularProgressIndicator())),
       );
@@ -62,7 +60,7 @@ class _MyAppWrapperState extends State<MyAppWrapper> {
     final themeData = _themeDataFor(_current);
 
     return MaterialApp(
-      key: ValueKey(_current), // Chave para forçar reconstrução ao trocar M2/M3
+      key: ValueKey(_current), 
       title: 'Meu Contador (Aula)',
       theme: themeData,
       home: CounterHome(
@@ -85,9 +83,8 @@ class _MyAppWrapperState extends State<MyAppWrapper> {
         );
 
       case AppTheme.highContrast:
-        // CORREÇÃO: Temas que não usam ColorScheme precisam ser Material 2
         return ThemeData(
-          useMaterial3: false, // MUDADO DE 'true' PARA 'false'
+          useMaterial3: false, 
           brightness: Brightness.dark,
           primaryColor: Colors.yellow,
           scaffoldBackgroundColor: Colors.black,
@@ -156,22 +153,21 @@ class _MyAppWrapperState extends State<MyAppWrapper> {
               backgroundColor: MaterialStateProperty.resolveWith<Color?>(
                 (Set<MaterialState> states) {
                   if (states.contains(MaterialState.selected)) {
-                    return Colors.yellow; // Fundo do botão selecionado
+                    return Colors.yellow; 
                   }
-                  // Fundo do botão não selecionado
                   return Colors.grey.shade900;
                 },
               ),
               foregroundColor: MaterialStateProperty.resolveWith<Color?>(
                 (Set<MaterialState> states) {
                   if (states.contains(MaterialState.selected)) {
-                    return Colors.black; // Cor do texto/ícone selecionado
+                    return Colors.black; 
                   }
-                  return Colors.yellow; // Cor do texto/ícone não selecionado
+                  return Colors.yellow; 
                 },
               ),
               side: MaterialStateProperty.all(
-                const BorderSide(color: Colors.yellow), // Cor da borda
+                const BorderSide(color: Colors.yellow), 
               ),
             ),
           ),
@@ -188,7 +184,6 @@ class _MyAppWrapperState extends State<MyAppWrapper> {
   }
 }
 
-/// Tela principal (contador)
 class CounterHome extends StatefulWidget {
   final AppTheme currentTheme;
   final ValueChanged<AppTheme> onThemeChanged;
@@ -207,18 +202,15 @@ class _CounterHomeState extends State<CounterHome> {
   int _counterA = 0;
   int _counterB = 0;
 
-  // NOVO: Estado para o valor do incremento (step)
   int _stepA = 1;
   int _stepB = 1;
 
-  // NOVO: Carrega os valores salvos ao iniciar
   @override
   void initState() {
     super.initState();
     _loadCounters();
   }
 
-  /// Carrega os valores dos contadores do SharedPreferences
   Future<void> _loadCounters() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -227,15 +219,12 @@ class _CounterHomeState extends State<CounterHome> {
     });
   }
 
-  /// Salva os valores atuais dos contadores
   Future<void> _saveCounters() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_kCounterAKey, _counterA);
     await prefs.setInt(_kCounterBKey, _counterB);
   }
 
-  // MODIFICADO: Métodos de incremento/decremento
-  // Agora são async, usam o 'step' e salvam o estado
   Future<void> _incA() async {
     setState(() => _counterA += _stepA);
     await _saveCounters();
@@ -243,7 +232,6 @@ class _CounterHomeState extends State<CounterHome> {
 
   Future<void> _decA() async {
     setState(() {
-      // Garante que não fique negativo
       _counterA = (_counterA - _stepA < 0) ? 0 : _counterA - _stepA;
     });
     await _saveCounters();
@@ -265,7 +253,6 @@ class _CounterHomeState extends State<CounterHome> {
     setState(() {
       _counterA = 0;
       _counterB = 0;
-      // Opcional: resetar os steps também
       _stepA = 1;
       _stepB = 1;
     });
@@ -273,7 +260,6 @@ class _CounterHomeState extends State<CounterHome> {
   }
 
   double _scaled(BuildContext context, double base) {
-    // Respecta a escala de fonte do sistema (acessibilidade)
     final scale = MediaQuery.of(context).textScaleFactor;
     return base * scale;
   }
@@ -337,31 +323,27 @@ class _CounterHomeState extends State<CounterHome> {
             Expanded(
               child: Row(
                 children: [
-                  // MODIFICADO: Passa os novos parâmetros para o Card A
                   Expanded(
                     child: buildCounterCard(
                       context,
                       "Contador A",
                       _counterA,
-                      _stepA, // Passa o step atual
+                      _stepA, 
                       _incA,
                       _decA,
-                      // Passa a função para ATUALIZAR o step
                       (newStep) => setState(() => _stepA = newStep),
                       displayStyle,
                     ),
                   ),
                   const SizedBox(width: 12),
-                  // MODIFICADO: Passa os novos parâmetros para o Card B
                   Expanded(
                     child: buildCounterCard(
                       context,
                       "Contador B",
                       _counterB,
-                      _stepB, // Passa o step atual
+                      _stepB, 
                       _incB,
                       _decB,
-                      // Passa a função para ATUALIZAR o step
                       (newStep) => setState(() => _stepB = newStep),
                       displayStyle,
                     ),
@@ -382,15 +364,14 @@ class _CounterHomeState extends State<CounterHome> {
     );
   }
 
-  /// MODIFICADO: Nova assinatura e novo widget (SegmentedButton)
   Widget buildCounterCard(
     BuildContext context,
     String label,
     int counterValue,
-    int stepValue, // NOVO: Valor do step atual
+    int stepValue,
     VoidCallback onIncrease,
     VoidCallback onDecrease,
-    ValueChanged<int> onStepChanged, // NOVO: Callback para mudar o step
+    ValueChanged<int> onStepChanged, 
     TextStyle displayStyle,
   ) {
     final theme = Theme.of(context);
@@ -407,20 +388,16 @@ class _CounterHomeState extends State<CounterHome> {
             Text('$counterValue', style: displayStyle),
             const SizedBox(height: 16),
 
-            // NOVO: Seletor de Step
             SegmentedButton<int>(
               segments: const [
                 ButtonSegment(value: 1, label: Text('1'), icon: Icon(Icons.add)),
                 ButtonSegment(value: 5, label: Text('5')),
                 ButtonSegment(value: 10, label: Text('10')),
               ],
-              // O 'selected' espera um Set, então colocamos o valor atual em {}
               selected: {stepValue},
               onSelectionChanged: (Set<int> newSelection) {
-                // Chama a callback para atualizar o estado no _CounterHomeState
                 onStepChanged(newSelection.first);
-              },
-              // Estilo para diminuir o padding
+              }
               style: ButtonStyle(
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 visualDensity: VisualDensity(horizontal: -2, vertical: -2)
@@ -436,12 +413,12 @@ class _CounterHomeState extends State<CounterHome> {
                 ElevatedButton.icon(
                   onPressed: onDecrease,
                   icon: const Icon(Icons.remove),
-                  label: Text(' $stepValue'), // Mostra o step
+                  label: Text(' $stepValue'), 
                 ),
                 ElevatedButton.icon(
                   onPressed: onIncrease,
                   icon: const Icon(Icons.add),
-                  label: Text(' $stepValue'), // Mostra o step
+                  label: Text(' $stepValue'), 
                 ),
               ],
             ),
